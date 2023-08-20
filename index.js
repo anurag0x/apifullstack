@@ -2,7 +2,8 @@ const express = require("express");
 const connection = require("./db");
 const userrouter = require("./routes/userroute");
 const { noterouter } = require("./routes/noteroutes");
-
+const cors=require("cors")
+app.use(cors())
 const app=express()
 app.use(express.json())
 app.get("/",(req,res)=>{
