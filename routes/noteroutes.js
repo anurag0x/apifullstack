@@ -35,15 +35,15 @@ noterouter.get("/",auth,async(req,res)=>{
   })
   noterouter.patch("/update/:id",auth, async (req, res) => {
     const {id} = req.params;
-    const note=NoteModel.findById(id)
+    const note=await NoteModel.findById(id)
     try {
+      console.log(note)
       // Use findByIdAndUpdate to update the document based on its ID
      if(note){
       await NoteModel.findByIdAndUpdate(id, req.body);
-     }
-     
-   
       res.status(200).send({"msg":"Note updated successfully","note":note});
+     }
+    
     } catch (error) {
       console.log(error);
       res.status(500).send("An error occurred while updating the note");
