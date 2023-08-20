@@ -14,6 +14,16 @@ noterouter.post("/add",auth,async(req,res)=>{
     console.log(error);
   }                      
 })
+noterouter.get("/:id",auth,async(req,res)=>{
+  let id= req.params.id;
+  try {
+    const note=await NoteModel.findById(id)
+  
+    res.status(201).send(note)
+  } catch (error) {
+    console.log(error);
+  }                      
+})
 noterouter.get("/",auth,async(req,res)=>{
     try {
       const note=await NoteModel.find()
@@ -25,11 +35,15 @@ noterouter.get("/",auth,async(req,res)=>{
   })
   noterouter.patch("/update/:id",auth, async (req, res) => {
     const {id} = req.params;
+    const note=NoteModel.findById(id)
     try {
       // Use findByIdAndUpdate to update the document based on its ID
-     await NoteModel.findByIdAndUpdate({_id:id}, req.body);
+     if(note){
+      await NoteModel.findByIdAndUpdate(id, req.body);
+     }
+     
    
-      res.status(200).send("Note updated successfully");
+      res.status(200).send({"msg":"Note updated successfully","note":note});
     } catch (error) {
       console.log(error);
       res.status(500).send("An error occurred while updating the note");
