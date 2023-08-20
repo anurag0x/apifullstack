@@ -3,8 +3,9 @@ const connection = require("./db");
 const userrouter = require("./routes/userroute");
 const { noterouter } = require("./routes/noteroutes");
 const cors=require("cors")
-app.use(cors())
+
 const app=express()
+app.use(cors())
 app.use(express.json())
 app.get("/",(req,res)=>{
     res.send("hii ,its a Homepage")
