@@ -1,46 +1,65 @@
-const express = require("express");
-const bcrypt=require("bcrypt");
-const { Usermodel } = require("../models/User");
-const jwt = require("jsonwebtoken");
-
-const userrouter=express.Router()
 
 
-userrouter.post("/register",async(req,res)=>{
-    const {username,email,pass}=req.body
+const express=require("express")
+const { User } = require("../model/User")
+const bcrypt=require("bcrypt")
+const jwt=require("jsonwebtoken")
+const { auth } = require("../middleware/auth")
+const userroute=express.Router()
+let Blacklist=new Array()
+
+userroute.post("/register",async(req,res)=>{
+    const {password,email}=req.body
     try {
-        bcrypt.hash(pass, 10, async(err, hash) =>{
-           if(err){
-            res.send({"msg":err,"err":"something is error"})
-           }else{
-                const user=new Usermodel({username,email,pass:hash})
-                await user.save()
-                res.status(200).send("registered succesfully😊")
-           }
-        });
-    } catch (error) {
-      console.log(error)  
-    }
-})
-
-userrouter.post("/login",async(req,res)=>{
-    const {email,pass}=req.body
-    try {
-        const user=await Usermodel.findOne({email})
+       const user=await User.findOne({email})
         if(user){
-            bcrypt.compare(pass,user.pass,(err,result)=>{
-                if(result){
-                  const token=jwt.sign({name:"Anuraag"},"masai")
-                  
-            res.send({"msg":"login Succesfully 👍","token":token})
-                }
-            })
-          
-        }else{
-          res.send("user not found! please register")
+    res.status(400).send("User already exist, please login")
+
+        }
+        else{
+            const hash=bcrypt.hashSync(password,8)
+          const newuser=  new User({...req.body,password:hash})
+          await newuser.save()
+          res.status(200).send({"msg":"User registered Successfully","user":{newuser}})
         }
     } catch (error) {
         console.log(error)
     }
 })
-module.exports=userrouter
+
+userroute.post("/login",async(req,res)=>{
+    const {email,password}=req.body
+    try {
+        const user=await User.findOne({email})
+        if(user){
+            bcrypt.compare(password,user.password,(err,result)=>{
+                if(result){
+                   const token=jwt.sign({payload:user.email},"masai") 
+                   res.status(201).send({"msg":"Login Successfully","token":{token}})
+                }
+                else{
+                    res.status(401).send("Something is wrong")  
+                }
+            })
+            
+
+        }
+    } catch (error) {
+        console.log(error)
+        res.status(401).send("Something is wrong")  
+    }
+})
+userroute.get("/logout",async(req,res)=>{
+    const token=req.headers.authorization?.split(" ")[1]
+    try {
+        Blacklist.push(token)
+        res.status(200).send("logout success")  
+    } catch (error) {
+        console.log(error)
+        res.status(401).send("Something is wrong")  
+    }
+    
+   
+})
+
+module.exports={userroute}

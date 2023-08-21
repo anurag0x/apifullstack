@@ -1,22 +1,20 @@
-const express = require("express");
-const connection = require("./db");
-const userrouter = require("./routes/userroute");
-const { noterouter } = require("./routes/noteroutes");
-const cors=require("cors")
-
+const express=require("express")
+const { connection } = require("./db")
+const {userroute} = require("./routes/userroute")
 const app=express()
-app.use(cors())
+const cors=require("cors")
+const postroute = require("./routes/postroute")
+
 app.use(express.json())
-app.get("/",(req,res)=>{
-    res.send("hii ,its a Homepage")
-})
-app.use("/user",userrouter)
-app.use("/note",noterouter)
-app.listen(8080,async(req,res)=>{
+app.use(cors())
+app.use("/users",userroute)
+app.use("/posts",postroute)
+app.listen(8080,async()=>{
     try {
         await connection
-        console.log("server is running")
+        console.log("server is running at port 8080")
     } catch (error) {
         console.log(error)
     }
+   
 })
